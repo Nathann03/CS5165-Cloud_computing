@@ -1,0 +1,23 @@
+.venv/
+.packages/
+.azure/
+__pycache__/
+*.pyc
+data/db/*.db
+data/db/*.db-journal
+data/uploads/*.csv
+8451_The_Complete_Journey_2_Sample-2/400_transactions.csv
+artifacts/analytics/*.json
+artifacts/ml/*.json
+deployment/app.zip
+deployment/ml_artifacts.zip
+
+# Internal planning / AI workflow notes
+TODO.md
+PROJECT_NOTES.md
+DECISIONS.md
+FINAL_STATUS.md
+CODEX_CONTEXT.md
+
+# Local-only secrets
+.admin_key.local

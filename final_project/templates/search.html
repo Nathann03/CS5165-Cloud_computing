@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="grid two-up">
+  <div class="card">
+    <h2>Search By Household</h2>
+    <form method="get" action="/search" class="stack-form">
+      <label>HSHD_NUM <input type="number" name="hshd_num" value="{{ hshd_num if hshd_num is not none else '' }}" required></label>
+      <button type="submit">Run Household Pull</button>
+    </form>
+    <p class="muted">Results combine household demographics, transaction facts, and product metadata in one joined view.</p>
+  </div>
+  <div class="card">
+    <h3>Search Notes</h3>
+    <ul>
+      <li>Use <code>10</code> for the rubric-required sample household.</li>
+      <li>Large results are capped at 500 displayed rows to keep the page readable.</li>
+      <li>The sort order matches the assignment rubric.</li>
+    </ul>
+  </div>
+</section>
+{% if hshd_num is not none %}
+<section class="card">
+  <h3>Results{% if row_count %}: {{ row_count }} rows found{% else %}: no rows found{% endif %}</h3>
+  {% include "table_partial.html" %}
+</section>
+{% endif %}
+{% endblock %}

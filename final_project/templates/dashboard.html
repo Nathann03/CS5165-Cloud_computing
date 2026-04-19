@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="grid two-up">
+  <article class="card rubric-card">
+    <p class="eyebrow">Retail Question 1</p>
+    <h2>Which household and product factors are shaping retail engagement?</h2>
+    <p>This dashboard answers the class retail questions by showing how demographics, spend trends, category demand, brand mix, basket pairs, and seasonality change across the dataset.</p>
+    <ul>
+      <li>Demographics and engagement: income, loyalty, household mix, and region</li>
+      <li>Engagement over time: monthly spend and items per basket</li>
+      <li>Basket analysis: common commodity pairs and cross-sell patterns</li>
+      <li>Brand preferences: national vs. private brand mix and organic behavior</li>
+      <li>Churn analysis: a ranked list of households most at risk of disengaging</li>
+    </ul>
+  </article>
+  <article class="card rubric-card accent-card">
+    <p class="eyebrow">What To Look For</p>
+    <h3>How to read this dashboard</h3>
+    <ol class="demo-steps">
+      <li>The KPI cards summarize overall household reach, transaction volume, and average basket behavior.</li>
+      <li>The time-series and category charts highlight where spending and product demand are rising or falling.</li>
+      <li>The basket pairs section shows which commodity combinations appear together most often.</li>
+      <li>The churn table identifies households with the strongest signs of disengagement risk.</li>
+    </ol>
+  </article>
+</section>
+
+<section class="grid dashboard-summary">
+  <div class="card"><span>{{ dashboard.engagement_summary.households }}</span><label>Households</label></div>
+  <div class="card"><span>{{ dashboard.engagement_summary.transactions }}</span><label>Transactions</label></div>
+  <div class="card"><span>${{ dashboard.engagement_summary.avg_basket_spend }}</span><label>Avg Basket Spend</label></div>
+  <div class="card"><span>{{ dashboard.engagement_summary.avg_items_per_basket }}</span><label>Avg Items / Basket</label></div>
+</section>
+
+<section class="card section-intro">
+  <p class="eyebrow">Cached Analytics</p>
+  <h2>Retail behavior at a glance</h2>
+  <p>The dashboard now uses precomputed analytics from the latest data load, so the page should open much faster while still reflecting the current dataset.</p>
+  <p class="muted">Retail question: how are engagement, category demand, brand behavior, and churn risk changing across households in this retail dataset?</p>
+</section>
+
+<section class="grid chart-grid">
+  <article class="card">
+    <p class="eyebrow">Engagement Over Time</p>
+    <h3>Monthly Spend Over Time</h3>
+    <p class="muted">Retail question: are households spending more or less over time?</p>
+    <div id="monthly-spend-chart"></div>
+  </article>
+  <article class="card">
+    <p class="eyebrow">Category Demand</p>
+    <h3>Top Department Spend</h3>
+    <p class="muted">Retail question: which product categories are gaining or losing spend?</p>
+    <div id="department-chart"></div>
+  </article>
+  <article class="card">
+    <p class="eyebrow">Brand Preferences</p>
+    <h3>Brand Spend Mix</h3>
+    <p class="muted">Retail question: how do shoppers split spend across brand types?</p>
+    <div id="brand-chart"></div>
+  </article>
+  <article class="card">
+    <p class="eyebrow">Demographics And Engagement</p>
+    <h3>Income Segment Spend</h3>
+    <p class="muted">Retail question: how does income level relate to retail engagement and spend?</p>
+    <div id="income-chart"></div>
+  </article>
+</section>
+
+<section class="grid two-up">
+  <article class="card">
+    <p class="eyebrow">Location Effects</p>
+    <h3>Region Spend</h3>
+    <p class="muted">Retail question: how does location affect overall customer engagement and spending?</p>
+    <table>
+      <thead><tr><th>Region</th><th>Spend</th></tr></thead>
+      <tbody>
+      {% for row in dashboard.region_spend %}
+        <tr><td>{{ row.store_r }}</td><td>${{ row.spend }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </article>
+  <article class="card">
+    <p class="eyebrow">Basket Analysis</p>
+    <h3>Common Commodity Pairs</h3>
+    <p class="muted">Retail question: what product combinations appear together often enough to support cross-selling?</p>
+    <table>
+      <thead><tr><th>Commodity A</th><th>Commodity B</th><th>Baskets</th></tr></thead>
+      <tbody>
+      {% for row in dashboard.top_pairs %}
+        <tr><td>{{ row.left }}</td><td>{{ row.right }}</td><td>{{ row.count }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </article>
+</section>
+
+<section class="card">
+  <p class="eyebrow">Churn Analysis</p>
+  <h3>Highest-Risk Households</h3>
+  <p class="muted">Retail question: which households appear most likely to disengage soon? This ranked list comes directly from the churn model and gives you a concrete retention target list to discuss.</p>
+  {% if at_risk_households %}
+  <div class="table-shell">
+    <table>
+      <thead>
+        <tr>
+          <th>HSHD_NUM</th>
+          <th>Risk Score</th>
+          <th>Risk Band</th>
+          <th>Recency Days</th>
+          <th>Historical Baskets</th>
+          <th>Recent Baskets</th>
+          <th>Historical Spend</th>
+          <th>Income</th>
+          <th>Loyalty</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for row in at_risk_households %}
+        <tr>
+          <td><a href="/search?hshd_num={{ row.hshd_num }}">{{ row.hshd_num }}</a></td>
+          <td>{{ row.churn_risk_score }}</td>
+          <td>{{ row.risk_band }}</td>
+          <td>{{ row.recency_days }}</td>
+          <td>{{ row.historical_baskets }}</td>
+          <td>{{ row.recent_baskets }}</td>
+          <td>${{ row.spend_total }}</td>
+          <td>{{ row.income_range }}</td>
+          <td>{{ row.loyalty }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p>No churn ranking is available yet. Run the ML workflows once to generate it.</p>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+  const dashboard = {{ dashboard_json|safe }};
+  Plotly.newPlot("monthly-spend-chart", [{
+    x: dashboard.monthly_spend.map(row => row.month),
+    y: dashboard.monthly_spend.map(row => row.spend),
+    type: "scatter",
+    mode: "lines+markers",
+    line: {color: "#e36a2b"}
+  }], {margin: {t: 10, r: 10, l: 45, b: 50}, paper_bgcolor: "transparent", plot_bgcolor: "transparent"});
+  Plotly.newPlot("department-chart", [{
+    x: dashboard.department_spend.map(row => row.department),
+    y: dashboard.department_spend.map(row => row.spend),
+    type: "bar",
+    marker: {color: "#0f7b6c"}
+  }], {margin: {t: 10, r: 10, l: 45, b: 90}, paper_bgcolor: "transparent", plot_bgcolor: "transparent"});
+  Plotly.newPlot("brand-chart", [{
+    labels: dashboard.brand_mix.map(row => row.brand_ty),
+    values: dashboard.brand_mix.map(row => row.spend),
+    type: "pie"
+  }], {margin: {t: 10, r: 10, l: 10, b: 10}, paper_bgcolor: "transparent"});
+  Plotly.newPlot("income-chart", [{
+    x: dashboard.income_spend.map(row => row.income_range),
+    y: dashboard.income_spend.map(row => row.spend),
+    type: "bar",
+    marker: {color: "#2f4bb2"}
+  }], {margin: {t: 10, r: 10, l: 45, b: 120}, paper_bgcolor: "transparent", plot_bgcolor: "transparent"});
+</script>
+{% endblock %}

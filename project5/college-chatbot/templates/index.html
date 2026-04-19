@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Inquiry Chatbot</title>
+    <style>
+        :root {
+            --page-bg: #faf8f5;
+            --surface: #ffffff;
+            --surface-muted: #f5f1ea;
+            --border: #ddd6c8;
+            --text-main: #2f241b;
+            --text-muted: #66584a;
+            --primary: #8a4b08;
+            --primary-hover: #6f3c06;
+            --error-bg: #fff4f2;
+            --error-border: #e7c3bb;
+            --error-text: #7a2f22;
+            --shadow: 0 2px 8px rgba(47, 36, 27, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Helvetica Neue", Helvetica, sans-serif;
+            color: var(--text-main);
+            background: var(--page-bg);
+            padding: 32px 20px;
+        }
+
+        .page {
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .panel-header {
+            padding: 24px 24px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-title {
+            margin: 0 0 8px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .panel-copy {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.98rem;
+            line-height: 1.5;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .section-title {
+            margin: 0 0 14px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .field-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            font-size: 0.98rem;
+            color: var(--text-main);
+            transition: border-color 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(138, 75, 8, 0.12);
+        }
+
+        .question-row {
+            display: flex;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .question-field {
+            flex: 1;
+        }
+
+        .submit-button {
+            padding: 11px 16px;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.96rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.16s ease, border-color 0.16s ease;
+        }
+
+        .submit-button:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .error-box,
+        .response-card,
+        .info-card,
+        .creator-card {
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .error-box {
+            background: var(--error-bg);
+            color: var(--error-text);
+            border: 1px solid var(--error-border);
+        }
+
+        .error-box ul {
+            margin: 10px 0 0 18px;
+            padding: 0;
+        }
+
+        .response-card,
+        .info-card,
+        .creator-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .response-card h2,
+        .info-card h3,
+        .creator-card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .response-card p,
+        .info-card p,
+        .creator-card p {
+            margin: 0 0 8px;
+            line-height: 1.6;
+        }
+
+        .stack {
+            display: grid;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .chat-shell {
+            margin-top: 24px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface-muted);
+            padding: 16px;
+        }
+
+        .chat-list {
+            display: grid;
+            gap: 12px;
+            max-height: 460px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .message {
+            max-width: 88%;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            background: var(--surface);
+        }
+
+        .message.user {
+            margin-left: auto;
+            background: #f3ece2;
+            border-color: #d9ccb8;
+        }
+
+        .message.bot {
+            margin-right: auto;
+        }
+
+        .message.newest {
+            border-color: #b99567;
+            box-shadow: 0 0 0 2px rgba(138, 75, 8, 0.08);
+        }
+
+        .message-label {
+            margin: 0 0 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .message-text {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .footer-note {
+            margin: 20px 0 0;
+            color: var(--text-muted);
+            font-size: 0.94rem;
+        }
+
+        .ta-panel {
+            margin-top: 24px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+            padding: 18px;
+        }
+
+        .ta-panel h3 {
+            margin: 0 0 10px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .ta-panel p {
+            margin: 0 0 10px;
+            color: var(--text-muted);
+            font-size: 0.94rem;
+            line-height: 1.5;
+        }
+
+        .ta-panel ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .ta-panel li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+            }
+
+            .panel-header,
+            .content {
+                padding: 18px;
+            }
+
+            .question-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <section class="panel">
+            <div class="panel-header">
+                <p class="panel-title">College Inquiry Chatbot</p>
+                <p class="panel-copy">
+                    Enter your information and type a question about internships, student life, study abroad, or career support.
+                </p>
+            </div>
+
+            <div class="content">
+                {% if errors %}
+                    <div class="messages">
+                        <div class="error-box">
+                            <strong>Please correct the following:</strong>
+                            <ul>
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <form method="post">
+                    <h2 class="section-title">Student Information</h2>
+                    <div class="field-grid">
+                        <div>
+                            <label for="first_name">First Name</label>
+                            <input id="first_name" name="first_name" type="text" value="{{ student_info.first_name }}" placeholder="Enter your first name">
+                        </div>
+                        <div>
+                            <label for="last_name">Last Name</label>
+                            <input id="last_name" name="last_name" type="text" value="{{ student_info.last_name }}" placeholder="Enter your last name">
+                        </div>
+                        <div>
+                            <label for="email">Email Address</label>
+                            <input id="email" name="email" type="email" value="{{ student_info.email }}" placeholder="Enter your email address">
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <h2 class="section-title">Ask a Question</h2>
+                    <div class="question-row">
+                        <div class="question-field">
+                            <label for="question">Question</label>
+                            <input id="question" name="question" type="text" value="{{ user_question }}" placeholder="Example: What internship opportunities are available for students?">
+                        </div>
+                        <button class="submit-button" type="submit">Send</button>
+                    </div>
+                </form>
+
+                <div class="chat-shell">
+                    <div class="chat-list" id="chat-list">
+                        <div class="message bot">
+                            <p class="message-label">College Inquiry Bot</p>
+                            <p class="message-text">What are you looking for today?</p>
+                        </div>
+
+                        {% for item in chat_history %}
+                            <div class="message {{ item.role }}{% if loop.index > (chat_history|length - 2) %} newest{% endif %}">
+                                <p class="message-label">{{ item.label }}</p>
+                                <p class="message-text">{{ item.text }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if chat_history %}
+                    <div class="stack">
+                        <div class="info-card">
+                            <h3>Student Information</h3>
+                            <p><strong>First Name:</strong> {{ student_info.first_name }}</p>
+                            <p><strong>Last Name:</strong> {{ student_info.last_name }}</p>
+                            <p><strong>Email:</strong> {{ student_info.email }}</p>
+                        </div>
+
+                        <div class="creator-card">
+                            <h3>Chatbot Creator Information</h3>
+                            <p><strong>First Name:</strong> {{ creator_info.first_name }}</p>
+                            <p><strong>Last Name:</strong> {{ creator_info.last_name }}</p>
+                            <p><strong>Email:</strong> {{ creator_info.email }}</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="footer-note">Type a question below the student details to continue the conversation.</p>
+                {% endif %}
+
+                <div class="ta-panel">
+                    <h3>TA Test Questions</h3>
+                    <p>Use these sample questions to verify the chatbot responses.</p>
+                    <ul>
+                        <li>What internship opportunities does the college provide?</li>
+                        <li>What student organizations are available?</li>
+                        <li>Does the college offer study abroad programs?</li>
+                        <li>What career services are available after graduation?</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script>
+        const chatList = document.getElementById("chat-list");
+        if (chatList) {
+            chatList.scrollTop = chatList.scrollHeight;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h2>Sample Data Pull For Household {{ hshd_num }}</h2>
+  <p>Showing the first 250 rows out of {{ row_count }} joined records, ordered by the rubric-required fields: <code>HSHD_NUM</code>, <code>BASKET_NUM</code>, <code>DATE</code>, <code>PRODUCT_NUM</code>, <code>DEPARTMENT</code>, and <code>COMMODITY</code>.</p>
+  {% include "table_partial.html" %}
+</section>
+{% endblock %}

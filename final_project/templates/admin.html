@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="grid two-up">
+  <article class="card">
+    <h2>Reload Datasets</h2>
+    <form method="post" action="/admin/reload" enctype="multipart/form-data" class="stack-form">
+      {% if admin_token_required %}
+      <label>Admin Token <input type="password" name="admin_token" required></label>
+      {% endif %}
+      <label>Households CSV <input type="file" name="households_file" accept=".csv"></label>
+      <label>Products CSV <input type="file" name="products_file" accept=".csv"></label>
+      <label>Transactions CSV <input type="file" name="transactions_file" accept=".csv"></label>
+      <button type="submit">Refresh Data Warehouse</button>
+    </form>
+    <p class="muted">Leave the fields empty to reload directly from the provided 84.51 CSV files. Upload replacements only when you want to test refreshed data.</p>
+    {% if admin_token_required %}
+    <p class="muted">This action is protected by an admin token so outside users cannot trigger repeated reloads.</p>
+    {% endif %}
+  </article>
+  <article class="card">
+    <h3>Azure Deployment Load Path</h3>
+    <p>For Azure deployment, the preferred path is to store the raw CSV files in Azure Blob Storage and run the separate loader script so the web app does not perform heavy ingestion during startup.</p>
+    <ul>
+      <li><code>python3 scripts/upload_dataset_to_blob.py</code> uploads the provided CSV files to Blob Storage.</li>
+      <li><code>python3 scripts/load_blob_to_db.py</code> downloads those blobs and populates the managed Azure database.</li>
+      <li>The web app should then start in read-only mode against the already-populated database.</li>
+    </ul>
+  </article>
+</section>
+
+<section class="card">
+  <h3>Latest Load Report</h3>
+  {% if report %}
+    <table>
+      <tbody>
+        <tr><th>Households</th><td>{{ report.households_rows }}</td></tr>
+        <tr><th>Products</th><td>{{ report.products_rows }}</td></tr>
+        <tr><th>Transactions</th><td>{{ report.transactions_rows }}</td></tr>
+        <tr><th>Household 10 Rows</th><td>{{ report.household_10_rows }}</td></tr>
+        <tr><th>Date Range</th><td>{{ report.date_min }} to {{ report.date_max }}</td></tr>
+        <tr><th>Elapsed Seconds</th><td>{{ report.elapsed_seconds }}</td></tr>
+      </tbody>
+    </table>
+  {% else %}
+    <p>No load report is available yet.</p>
+  {% endif %}
+  <p class="muted">Use this report to confirm that the household, product, and transaction tables were refreshed correctly before demoing search and dashboard features.</p>
+{% endblock %}

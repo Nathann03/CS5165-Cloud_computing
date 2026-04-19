@@ -1,0 +1,22 @@
+{
+  "households_rows": 86,
+  "products_rows": 7278,
+  "transactions_rows": 15205,
+  "required_household_present": true,
+  "selected_households": 86,
+  "class_counts": {
+    "1": 65,
+    "0": 21
+  },
+  "transactions_by_class": {
+    "0": 11417,
+    "1": 3788
+  },
+  "date_min": "2018-08-17",
+  "date_max": "2020-08-15",
+  "output_files": {
+    "households": "/mnt/c/Users/natha/OneDrive/Desktop/CS5165-Cloud_computing/final_project/data/azure_demo/balanced_households.csv",
+    "products": "/mnt/c/Users/natha/OneDrive/Desktop/CS5165-Cloud_computing/final_project/data/azure_demo/balanced_products.csv",
+    "transactions": "/mnt/c/Users/natha/OneDrive/Desktop/CS5165-Cloud_computing/final_project/data/azure_demo/balanced_transactions.csv"
+  }
+}

@@ -1,0 +1,6 @@
+.gcloudignore
+.git
+.gitignore
+.packages/
+.gcloud-config/
+__pycache__/

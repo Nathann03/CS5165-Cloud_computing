@@ -1,0 +1,22 @@
+.codex
+
+# Python generated files
+__pycache__/
+*.py[cod]
+
+# Local virtual environments and package installs
+.venv/
+.packages/
+
+# Cloud CLI caches and downloaded SDKs
+.azure/
+.gcloud-config/
+google-cloud-cli-linux-x86_64/
+
+# Local-only secrets
+.admin_key.local
+.env
+
+# Oversized raw coursework data; use the committed 10k-row sample or set
+# TRANSACTIONS_CSV locally to point at the full file.
+final_project/8451_The_Complete_Journey_2_Sample-2/400_transactions.csv

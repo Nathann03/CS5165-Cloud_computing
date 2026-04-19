@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div class="card hero-card">
+    <p class="eyebrow">Retail Analytics Studio</p>
+    <h2>Sign in to open the retail analytics demo.</h2>
+    <p>Built on the 84.51 sample dataset, this app combines household-level data pulls, a retail dashboard, and practical ML outputs in a format that is easy to explain live.</p>
+    <div class="stats">
+      <div><span>{{ counts.get('households', 0) }}</span><label>Households</label></div>
+      <div><span>{{ counts.get('products', 0) }}</span><label>Products</label></div>
+      <div><span>{{ counts.get('transactions', 0) }}</span><label>Transactions</label></div>
+    </div>
+  </div>
+  <div class="card form-card">
+    {% if demo_user %}
+    <h3>Welcome Back</h3>
+    <p class="muted">Signed in as <strong>{{ demo_user.username }}</strong>. Open any part of the demo below.</p>
+    <div class="stack-form">
+      <a class="button-link" href="/sample-household">Sample Data Pull</a>
+      <a class="button-link" href="/search?hshd_num=10">Household Search</a>
+      <a class="button-link" href="/dashboard">Retail Dashboard</a>
+      <a class="button-link" href="/ml">ML Results</a>
+    </div>
+    {% else %}
+    <h3>Demo Login</h3>
+    <p class="muted">Use a simple login to unlock the class demo pages. This is a lightweight rubric-friendly form, not enterprise authentication.</p>
+    <form method="post" action="/login" class="stack-form">
+      <label>Username <input type="text" name="username" required></label>
+      <label>Password <input type="password" name="password" required></label>
+      <label>Email <input type="email" name="email" required></label>
+      <button type="submit">Sign In To Demo</button>
+    </form>
+    {% if login_error %}
+    <div class="notice error">{{ login_error }}</div>
+    {% endif %}
+    {% endif %}
+  </div>
+</section>
+
+<section class="grid two-up">
+  <article class="card">
+    <h3>What This Covers</h3>
+    <ul>
+      <li>Managed Azure database deployment path</li>
+      <li>Joined household sample pull for <code>HSHD_NUM 10</code></li>
+      <li>Interactive household search with rubric sort order</li>
+      <li>Reload workflow for updated CSV datasets</li>
+      <li>Dashboard for engagement, demographics, brand mix, and basket patterns</li>
+      <li>CLV, basket analysis, and churn ML outputs</li>
+      <li>Token-protected admin and model-training actions</li>
+      <li>Ranked at-risk household list for retention analysis</li>
+    </ul>
+  </article>
+  <article class="card">
+    <h3>Fast Demo Path</h3>
+    <ul>
+      <li>Sign in with the demo login form</li>
+      <li><a href="/sample-household">Open the required household 10 sample pull</a></li>
+      <li><a href="/search?hshd_num=10">Use the searchable household view</a></li>
+      <li><a href="/dashboard">Review spend and basket trends</a></li>
+      <li><a href="/ml">Inspect CLV, basket, and churn metrics</a></li>
+    </ul>
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="grid two-up">
+  <article class="card">
+    <p class="eyebrow">ML Model Application</p>
+    <h2>Basket Analysis With A Clear Retail Question</h2>
+    <p>Retail question: <strong>What product combinations are commonly purchased together, and how can they drive cross-selling opportunities?</strong></p>
+    <p>The app answers that with a <strong>Random Forest</strong> model trained at basket level. It predicts whether a likely cross-sell target commodity will appear when a basket already contains a high-frequency primary commodity.</p>
+    <p class="muted">Output shown below: selected commodities, model accuracy, ROC AUC, and saved JSON metrics for submission.</p>
+    <form method="post" action="/ml/run" class="stack-form">
+      {% if admin_token_required %}
+      <label>Admin Token <input type="password" name="admin_token" required></label>
+      {% endif %}
+      <button type="submit">Recompute ML Metrics</button>
+    </form>
+    {% if admin_token_required %}
+    <p class="muted">Training is protected so public visitors cannot repeatedly consume compute.</p>
+    {% endif %}
+  </article>
+  <article class="card">
+    <h3>Models Included In The Project</h3>
+    <ul>
+      <li><strong>Gradient Boosting Regressor</strong> for CLV prediction</li>
+      <li><strong>Random Forest Classifier</strong> for basket analysis and cross-sell prediction</li>
+      <li><strong>Gradient Boosting Classifier</strong> for churn risk scoring</li>
+      <li>Short write-ups for Linear Regression, Random Forest, and Gradient Boosting in <code>ML_MODEL_WRITEUP.md</code></li>
+    </ul>
+  </article>
+</section>
+
+{% if metrics.get('basket_metrics') %}
+<section class="card rubric-card">
+  <p class="eyebrow">Basket Analysis Output</p>
+  <h3>What The Model Found</h3>
+  <div class="grid three-up compact-grid">
+    <div class="mini-metric">
+      <span>{{ metrics['basket_metrics']['primary_commodity'] }}</span>
+      <label>Primary Commodity In Basket</label>
+    </div>
+    <div class="mini-metric">
+      <span>{{ metrics['basket_metrics']['cross_sell_target_commodity'] }}</span>
+      <label>Predicted Cross-Sell Target</label>
+    </div>
+    <div class="mini-metric">
+      <span>{{ metrics['basket_metrics']['roc_auc'] }}</span>
+      <label>ROC AUC</label>
+    </div>
+  </div>
+  <p class="muted">Interpretation: when the first commodity appears in a basket, the model estimates the likelihood that the second commodity will also appear. That gives you a class-ready cross-sell story tied directly to the retail question.</p>
+</section>
+{% endif %}
+
+{% if metrics.get('churn_metrics') %}
+<section class="card rubric-card">
+  <p class="eyebrow">At-Risk Households</p>
+  <h3>Churn Analysis Output</h3>
+  <p>Retail question: which households are showing signs of disengaging? The churn model scores households using spend, basket count, item count, recent activity, and recency. The ranked household list is shown on the dashboard for a concrete retention view.</p>
+  {% if metrics['churn_metrics']['evaluation_method'] == 'holdout' %}
+  <p class="muted">Current churn model performance: accuracy <strong>{{ metrics['churn_metrics']['accuracy'] }}</strong>, ROC AUC <strong>{{ metrics['churn_metrics']['roc_auc'] }}</strong>.</p>
+  {% else %}
+  <p class="muted">{{ metrics['churn_metrics']['evaluation_note'] }}</p>
+  {% endif %}
+</section>
+{% endif %}
+
+<section class="grid three-up">
+  {% for name, metric in metrics.items() %}
+  <article class="card">
+    <h3>{{ name.replace('_', ' ').title() }}</h3>
+    <pre>{{ metric | tojson(indent=2) }}</pre>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}
